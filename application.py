@@ -1,6 +1,6 @@
 import os
 import os
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
 import pandas as pd
@@ -45,9 +45,9 @@ def upload_file():
       <p><input type=file name=file>
          <input type=submit value=Upload>
     </form>
-    <a href = "/create_childsets"><button> Create Child Dataset</button> </a>
-    <a href = "/retention_time_roundoff"><button> Round off retention time </button> </a>
-    <a href = "/mean"><button> Calculate Mean Across Sample </button> </a>
+    <a href = "/create_childsets"><button> Create Child Dataset</button> </a><br>
+    <a href = "/retention_time_roundoff"><button> Round off retention time </button> </a><br>
+    <a href = "/mean"><button> Calculate Mean Across Sample </button> </a><br>
     '''
 
 @app.route('/uploads/<filename>')
@@ -80,19 +80,25 @@ def retention_time_roundoff():
     """
     df = pd.read_excel("./uploads/eluci_data.xlsx")
     df['Rounded Retention Time'] = df['Retention time (min)'].round()
-    df.to_excel('rounded_retention_time.xlsx')
+    writer = pd.ExcelWriter('./datasets/rounded_retention_time.xlsx')
+    df.to_excel(writer)
+    writer.save()
+    flash("Look in the datasets folder")
+    return redirect(url_for('upload_file'))
 
 
 @app.route('/mean')
 def mean_across_samples():
-    df = pd.read_excel("./uploads/eluci_data.xlsx")
+    df = pd.read_excel("./datasets/rounded_retention_time.xlsx")
     new_df = pd.DataFrame()
     a = df.ix[:,3:1049]
     new_df = a
-    new_df.insert(0, 'retention time roundoff', df['retention_time-rounded'])
+    new_df.insert(0, 'retention time roundoff', df['Rounded Retention Time'])
     new_df.insert(1, 'mean', df.ix[:,3:1049].mean(axis=1))
+    new_df.to_excel('./datasets/mean_sample.xlsx')
+    return redirect(url_for('upload_file'))
 
-    new_df.head()
+
 
 
 if __name__ == '__main__':

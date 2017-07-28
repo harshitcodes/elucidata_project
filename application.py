@@ -45,9 +45,12 @@ def upload_file():
       <p><input type=file name=file>
          <input type=submit value=Upload>
     </form>
-    <a href = "/create_childsets"><button> Create Child Dataset</button> </a><br>
-    <a href = "/retention_time_roundoff"><button> Round off retention time </button> </a><br>
-    <a href = "/mean"><button> Calculate Mean Across Sample </button> </a><br>
+    <h2> Create Child Datasets of "PC", "LPC", "plasmalogen".</h2>
+    <a href = "/create_childsets"><button> Create Child Dataset</button> </a><br><br><br>
+    <h2> Round off retention time.</h2>
+    <a href = "/retention_time_roundoff"><button> Round off retention time </button> </a><br><br><br>
+    <h2> Calculating mean across all samples.</h2>
+    <a href = "/mean"><button> Calculate Mean Across Sample </button> </a><br><br><br>
     '''
 
 @app.route('/uploads/<filename>')

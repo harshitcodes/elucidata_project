@@ -1,6 +1,6 @@
 import os
 import os
-from flask import Flask, request, redirect, url_for, flash
+from flask import Flask, request, redirect, url_for, flash, make_response, send_file
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
 import pandas as pd
@@ -74,6 +74,13 @@ def create_child_sets():
 
     return redirect(url_for('upload_file'))
 
+@app.route('/return-files/')
+def return_files_tut():
+	try:
+		return send_file('/Users/harshit/projects/Elucidata/datasets/rounded_retention_time.xlsx', attachment_filename='rounded_retention_time.xlsx')
+	except Exception as e:
+		return str(e)
+
 
 @app.route('/retention_time_roundoff')
 def retention_time_roundoff():
@@ -87,11 +94,22 @@ def retention_time_roundoff():
     df.to_excel(writer)
     writer.save()
     flash("Look in the datasets folder")
-    return redirect(url_for('upload_file'))
+    return redirect(url_for('return_files_tut'))
 
+
+@app.route('/return-files/')
+def return_files_tut():
+	try:
+		return send_file('/Users/harshit/projects/Elucidata/datasets/rounded_retention_time.xlsx', attachment_filename='rounded_retention_time.xlsx')
+	except Exception as e:
+		return str(e)
 
 @app.route('/mean')
 def mean_across_samples():
+    """
+    Calculates the mean of all mobilites
+    across all the samples.
+    """
     df = pd.read_excel("./datasets/rounded_retention_time.xlsx")
     new_df = pd.DataFrame()
     a = df.ix[:,3:1049]
@@ -99,8 +117,14 @@ def mean_across_samples():
     new_df.insert(0, 'retention time roundoff', df['Rounded Retention Time'])
     new_df.insert(1, 'mean', df.ix[:,3:1049].mean(axis=1))
     new_df.to_excel('./datasets/mean_sample.xlsx')
-    return redirect(url_for('upload_file'))
+    return redirect(url_for('return_files_tut_mean'))
 
+@app.route('/return-files-mean/')
+def return_files_tut_mean():
+	try:
+		return send_file('/Users/harshit/projects/Elucidata/datasets/mean_sample.xlsx', attachment_filename='rounded_retention_time.xlsx')
+	except Exception as e:
+		return str(e)
 
 
 

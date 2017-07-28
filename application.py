@@ -3,6 +3,7 @@ import os
 from flask import Flask, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
+import pandas as pd
 
 UPLOAD_FOLDER = './uploads/'
 ALLOWED_EXTENSIONS = set(['csv', 'xlsx'])
@@ -44,6 +45,9 @@ def upload_file():
       <p><input type=file name=file>
          <input type=submit value=Upload>
     </form>
+    <a href = "/create_childsets"><button> Create Child Dataset</button> </a>
+    <a href = "/retention_time_roundoff"><button> Round off retention time </button> </a>
+    <a href = "/mean"><button> Calculate Mean Across Sample </button> </a>
     '''
 
 @app.route('/uploads/<filename>')
@@ -51,7 +55,45 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
 
-        
+
+@app.route('/create_childsets')
+def create_child_sets():
+    """
+    creates 3 child datasets for
+    the main dataframe based on
+    keystrings in the dataframe col
+    """
+    df = pd.read_excel("./uploads/eluci_data.xlsx")
+    children = [' PC', ' LPC', ' plasmalogen']
+    for i in children:
+        a = df[df['Accepted Compound ID'].str.contains(i, na = False)]
+        a.to_excel('./datasets/{}.xlsx'.format(i))
+
+    return redirect(url_for('upload_file'))
+
+
+@app.route('/retention_time_roundoff')
+def retention_time_roundoff():
+    """
+    rounds off the retention time for each sample
+    and adds the col to the main df.
+    """
+    df = pd.read_excel("./uploads/eluci_data.xlsx")
+    df['Rounded Retention Time'] = df['Retention time (min)'].round()
+    df.to_excel('rounded_retention_time.xlsx')
+
+
+@app.route('/mean')
+def mean_across_samples():
+    df = pd.read_excel("./uploads/eluci_data.xlsx")
+    new_df = pd.DataFrame()
+    a = df.ix[:,3:1049]
+    new_df = a
+    new_df.insert(0, 'retention time roundoff', df['retention_time-rounded'])
+    new_df.insert(1, 'mean', df.ix[:,3:1049].mean(axis=1))
+
+    new_df.head()
+
 
 if __name__ == '__main__':
     app.secret_key = "thisismysupersecret"

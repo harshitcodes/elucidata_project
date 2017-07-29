@@ -74,12 +74,7 @@ def create_child_sets():
 
     return redirect(url_for('upload_file'))
 
-@app.route('/return-files/')
-def return_files_tut():
-	try:
-		return send_file('/Users/harshit/projects/Elucidata/datasets/rounded_retention_time.xlsx', attachment_filename='rounded_retention_time.xlsx')
-	except Exception as e:
-		return str(e)
+
 
 
 @app.route('/retention_time_roundoff')
